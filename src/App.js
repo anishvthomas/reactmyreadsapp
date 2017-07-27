@@ -6,90 +6,74 @@ import './App.css'
 import {Route} from 'react-router-dom'
 
 class BooksApp extends React.Component {
-  state = {
+    state = {
       bookDisplayList:[],
       bookSearchResultList:[]
 
-  }
-  updateShelf=(bookid,item)=>{
-      console.log("BookList.handleShelfChange",bookid,item)
-      BooksAPI.update({id:bookid},item).then((response)=>{
-          BooksAPI.getAll().then((books)=> {
+    }
+
+    updateShelf = (bookId,item) => {
+      BooksAPI.update({id:bookId},item).then((response) => {
+          BooksAPI.getAll().then((books) => {
               this.setState({bookDisplayList:books})
               })
           }
       )
-  }
-  render() {
-    return (
-      <div className="app">
-      <Route exact path="/" render={()=>(<BookList bookList={this.state.bookDisplayList}
-          handleShelfChange={this.updateShelf}
-          clearSearch={this.clearSearchResults}/>)}
-      />
-      <Route path="/search" render={()=>(<BookSearch bookList={this.state.bookDisplayList}
-          bookResultList={this.state.bookSearchResultList}
-          handleShelfChange={this.updateShelf}
-          doSearch={this.searchBooks}/>)}
-          />
-      </div>
-    )
-  }
-clearSearchResults(){
-    this.setState({bookSearchResultList:[]})
-}
-componentDidMount(){
-    this.getBookList()
-}
+    }
+    render() {
+        return (
+          <div className="app">
+              <Route exact path ="/" render = {() => (<BookList bookList = {this.state.bookDisplayList}
+                  handleShelfChange={this.updateShelf}
+                  clearSearch={this.clearSearchResults}/>)}
+              />
+              <Route path ="/search" render = {() => (<BookSearch bookList = {this.state.bookDisplayList}
+                  bookResultList={this.state.bookSearchResultList}
+                  handleShelfChange={this.updateShelf}
+                  doSearch = {this.searchBooks}/>)}
+                  />
+          </div>
+        )
+    }
 
-getBookList=()=>{
-    BooksAPI.getAll().then((books)=> {
-        console.log("books",books)
-        console.log(books.map((book)=>book.title))
-        this.setState({bookDisplayList:books})
+    /**
+    *Clear the search results when opening the serach page
+    */
+    clearSearchResults(){
+        this.setState({bookSearchResultList:[]})
+    }
 
-    })
-}
+    componentDidMount(){
+        this.getBookList()
+    }
 
-searchBooks=(query)=>{
+    getBookList = () => {
+        BooksAPI.getAll().then((books) => {
+            this.setState({bookDisplayList:books})
+        })
+    }
 
-        console.log("Searchkey: "+query)
-        if(query.trim())
-            BooksAPI.search(query.trim(),20).then((response)=>{
-                console.log("res",response)
+    searchBooks = (query) => {
+        const MAX_RESULTS = 20;
+        //perform search only if the query is not empty
+        if(query.trim()) {
+            BooksAPI.search(query.trim(),MAX_RESULTS).then((response) => {
                 if(!response.error) {
-                    //Compare and correct teh shelf state of books from
+                    //Compare and correct the shelf state of books from
                     //the result by matching it with the results from the display page
-                    var updatedResponse=response.map((bookreturned)=>{
-                        var bookexists = this.state.bookDisplayList.filter((showbook)=> {
-                            return showbook.id===bookreturned.id})
-                            if(bookexists.length > 0)
-                            {
-                                bookreturned.shelf=bookexists[0].shelf
-                            }
+                    const updatedSearchResults = response.map((bookReturned) => {
+                        const bookExists = this.state.bookDisplayList.filter((showbook) => {
+                            return showbook.id===bookReturned.id });
+                        if (bookExists.length > 0)
+                            bookReturned.shelf=bookExists[0].shelf;
                         else
-                            bookreturned.shelf="None"
-                        return bookreturned});
+                            bookReturned.shelf="None";
+                        return bookReturned});
 
-                    this.setState({bookSearchResultList:updatedResponse})
-
-                    /*this.setState({bookResultList:response.map((book)=>{
-                        console.log("book:",book)
-                        if(book['id']){
-                        var bookid=book.id
-                        var bookexists ;
-                        console.log("this.props.bookList")
-                        //= this.props.bookList.filter(showbook=> showbook.id===bookid)
-                        if(bookexists)
-                            book.shelf=bookexists.shelf
-                        else
-                            book.shelf="None"}
-
-                    }
-                )})*/
+                    this.setState({bookSearchResultList:updatedSearchResults})
                 }
             })
-
-}
+        }
+    }
 }
 export default BooksApp

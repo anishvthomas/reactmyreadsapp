@@ -25,11 +25,10 @@ const Book = (props) => {
           <div className="book-title">{props.bookitem.title}</div>
           <div className="book-authors">{props.bookitem.authors && props.bookitem.authors.join(', ')}</div>
         </div>
-
     )
-
 }
 Book.proptyes ={
-    bookitem:PropTypes.object.isRequired
+    bookitem:PropTypes.object.isRequired,
+    updateShelf:PropTypes.func.isRequired
 }
 export default Book
