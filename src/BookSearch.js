@@ -9,6 +9,7 @@ const BookSearch =(props)=> {
         props.handleShelfChange(bookid,item)
     }
     const handleChange=(event)=>{
+
         props.doSearch(event.target.value)
     }
     return (
@@ -29,6 +30,7 @@ const BookSearch =(props)=> {
           </div>
         </div>
     )
+    
 
 }
 BookSearch.propTypes = {
